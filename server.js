@@ -20,7 +20,7 @@ const doubleBase64Decode = (str) => base64url.decode(base64url.decode(str));
 
 // Function to save shortened link to a file
 const saveShortenedLink = (id) => {
-    const shortenedLink = `http://localhost:${port}/${id}?ref=bm9yZGVyLXNub29yLmNvbQ%3D%3D\n`;
+    const shortenedLink = `http://localhost:${port}/${id}?ref=${encodedReferral}\n`;
     const filePath = path.join(__dirname, 'shortened_links.txt');
     fs.appendFile(filePath, shortenedLink, (err) => {
         if (err) {
@@ -41,14 +41,14 @@ app.post('/create', express.json(), (req, res) => {
         return res.status(400).send('URL, title, and username are required');
     }
     const encodedUsername = doubleBase64Encode(username);
-    const encodedReferral = doubleBase64Encode('office.com');
+    const encodedReferral = doubleBase64Encode('vercel');
     db.run('INSERT INTO links (url, title, username, referral, clicks) VALUES (?, ?, ?, ?, 0)', [url, title, encodedUsername, encodedReferral], function(err) {
         if (err) {
             return res.status(500).send('Error creating link');
         }
         const id = this.lastID;
         saveShortenedLink(id); // Save the shortened link to the file
-        res.send({ id: id, shortUrl: `http://localhost:${port}/${id}?ref=bm9yZGVyLXNub29yLmNvbQ%3D%3D` });
+        res.send({ id: id, shortUrl: `http://localhost:${port}/${id}?ref=${encodedReferral}` });
     });
 });
 
